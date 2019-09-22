@@ -11,7 +11,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 
 public class DomainInfo {
-
+	
+	public static Byte DASH_BYTE = "-".getBytes()[0];
 	public static String ERROR_INVALID_SUFFIX = "Invalid Suffix";
 	public static String ERROR_UNKNOWN_ERROR = "Unknown Error";
 	
@@ -30,6 +31,11 @@ public class DomainInfo {
 	double rtld_fqdn_dilution = 0.0;
 	double hostname_fqdn_dilution = 0.0;
 	double hostname_rtld_dilution = 0.0;
+	
+	int suffix_dash_count = 0;
+	int rtld_dash_count = 0;
+	int fqdn_dash_count = 0;
+	int hostname_dash_count = 0;
 
 	HashMap<String, ArrayList<SimilarityResult>> matches_fqdn;
 	HashMap<String, ArrayList<SimilarityResult>> matches_rtld;
@@ -69,16 +75,29 @@ public class DomainInfo {
 	public void setHostname(String hostname) {
 		hostname_set = true;
 		this.hostname = hostname;
+		resetDashCounts();
+		updateDashCounts();
 	}
 	
 	public void setRtld(String rtld) {
 		rtld_set = true;
 		this.rtld = rtld;
+		resetDashCounts();
+		updateDashCounts();
 	}
 	
 	public void setSuffix(String suffix) {
 		suffix_set = true;
 		this.suffix = suffix;
+		resetDashCounts();
+		updateDashCounts();
+	}
+	
+	public void resetDashCounts() {
+		suffix_dash_count = 0;
+		rtld_dash_count = 0;
+		hostname_dash_count = 0;
+		fqdn_dash_count = 0;
 	}
 
 	public boolean isRtldSet() {
@@ -99,10 +118,6 @@ public class DomainInfo {
 
 	public boolean isError() {
 		return error;
-	}
-
-	public String getRtld() {
-		return rtld;
 	}
 
 	public String getHostname() {
@@ -145,8 +160,14 @@ public class DomainInfo {
 	}
 	
 	public String getFqdn() {
-		if (isHostnameSet() && isRtldSet())
-			return hostname + "." + rtld;
+		if (isHostnameSet() && isRtldSet() && isSuffixSet())
+			return getHostname() + getRtld();
+		return new String();
+	}
+	
+	public String getRtld() {
+		if (isRtldSet() && isSuffixSet())
+			return rtld + "." + suffix;
 		return new String();
 	}
 	
@@ -274,5 +295,50 @@ public class DomainInfo {
 			}
 		}
 		return results;
+	}
+	
+	public int getHostnameDashCount() {
+		if (hostname_dash_count > 0)
+			return hostname_dash_count;
+		for (Byte b: hostname.getBytes()) {
+			if (b == DASH_BYTE)
+				hostname_dash_count++;
+		}
+		return hostname_dash_count;
+	}
+	
+	public int getRtldDashCount() {
+		if (rtld_dash_count > 0)
+			return rtld_dash_count;
+		for (Byte b: rtld.getBytes()) {
+			if (b == DASH_BYTE)
+				rtld_dash_count++;
+		}
+		return rtld_dash_count;
+	}
+	
+	public int getFqdnDashCount() {
+		if (fqdn_dash_count > 0)
+			return fqdn_dash_count;
+		for (Byte b: getFqdn().getBytes()) {
+			if (b == DASH_BYTE)
+				fqdn_dash_count++;
+		}
+		return fqdn_dash_count;
+	}
+	public int getSuffixDashCount() {
+		if (suffix_dash_count > 0)
+			return suffix_dash_count;
+		for (Byte b: suffix.getBytes()) {
+			if (b == DASH_BYTE)
+				suffix_dash_count++;
+		}
+		return suffix_dash_count;
+	}
+	public void updateDashCounts() {
+		getSuffixDashCount();
+		getFqdnDashCount();
+		getRtldDashCount();
+		getHostnameDashCount();
 	}
 }

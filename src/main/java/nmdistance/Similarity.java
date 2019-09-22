@@ -17,7 +17,11 @@ public class Similarity {
 
 	
 	public static final String [] STRIP_CHARS = {".", "-"};
-	public static final String [][] REPLACE_LEET = { {"1", "i"}, {"4", "a"}, {"7", "l"}};
+	public static final String [][] REPLACE_LEET = { 
+			{"1", "i"}, 
+			{"4", "a"}, 
+			{"7", "l"},
+			{"0", "o"}};
 	
 	public static final double DEFAULT_FUZZY_CONTAINS_THRESHOLD = .86;
 	public static final String ALL = "all";
@@ -32,8 +36,7 @@ public class Similarity {
 	};
 	
 	static public String preprocess(String input) {
-		String output = input;
-		
+		String output = input.toLowerCase();
 		for (String x: STRIP_CHARS) {
 			output = output.replace(x, "");
 		}
@@ -44,6 +47,8 @@ public class Similarity {
 	}
 
 	static private SimilarityResult execute(String name, String left, String right) {
+		left = left.toLowerCase();
+		right = right.toLowerCase();
 		
 		if (name.equals(JARO_WINKLER)) {
 		    return jaro_winkler(left, right); 
@@ -57,10 +62,13 @@ public class Similarity {
 		if (name.equals(SORENSEN_DICE)) {
 		    return sorensen_dice(left, right); 
 		}		
-		return new SimilarityResult(true, "Unknown Algorithm");
+		SimilarityResult sr = new SimilarityResult(true, "Unknown Algorithm");
+		sr.left = left;
+		sr.right = right;
+		return sr;
 	}
 	
-	static ArrayList<SimilarityResult> executeByName(String name, String left, String right) {
+	static public ArrayList<SimilarityResult> executeByName(String name, String left, String right) {
 		ArrayList<SimilarityResult> results = new ArrayList<SimilarityResult>();
 		if (name.equals(ALL))
 			results = executeAll(left, right);
@@ -72,7 +80,7 @@ public class Similarity {
 		return results;
 	}
 	
-	static ArrayList<SimilarityResult> executeByNameNoUpdate(String name, String left, String right) {
+	static public ArrayList<SimilarityResult> executeByNameNoUpdate(String name, String left, String right) {
 		ArrayList<SimilarityResult> results = new ArrayList<SimilarityResult>();
 		if (name.equals(ALL))
 			return executeAll(left, right);
@@ -80,7 +88,7 @@ public class Similarity {
 		return results;
 	}
 	
-	static ArrayList<SimilarityResult> executeAll(String left, String right) {
+	static public ArrayList<SimilarityResult> executeAll(String left, String right) {
 		ArrayList<SimilarityResult> results = new ArrayList<SimilarityResult>();
 		for (String name: ALGORITHMS) {
 			results.add(execute(name, left, right));
@@ -88,7 +96,7 @@ public class Similarity {
 		return results;
 	}
 	
-	static ArrayList<SimilarityResult> executeByName(String name, ArrayList<String> lefts, ArrayList<String> rights) {
+	static public ArrayList<SimilarityResult> executeByName(String name, ArrayList<String> lefts, ArrayList<String> rights) {
 		ArrayList<SimilarityResult> results = new ArrayList<SimilarityResult>();
 		for (String left: lefts) {
 			for (String right: rights) {
@@ -98,7 +106,7 @@ public class Similarity {
 		return results;
 	}
 	
-	static ArrayList<SimilarityResult> executeByName(String name, String left, ArrayList<String> rights) {
+	static public ArrayList<SimilarityResult> executeByName(String name, String left, ArrayList<String> rights) {
 		ArrayList<SimilarityResult> results = new ArrayList<SimilarityResult>();
 		for (String right: rights) {
 			results.addAll(executeByName(name, left, right));
@@ -106,7 +114,7 @@ public class Similarity {
 		return results;
 	}
 	
-	static ArrayList<SimilarityResult> executeByNameNoUpdate(String name, String left, ArrayList<String> rights) {
+	static public ArrayList<SimilarityResult> executeByNameNoUpdate(String name, String left, ArrayList<String> rights) {
 		ArrayList<SimilarityResult> results = new ArrayList<SimilarityResult>();
 		for (String right: rights) {
 			results.addAll(executeByNameNoUpdate(name, left, right));
